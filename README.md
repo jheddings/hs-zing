@@ -12,7 +12,7 @@ A Hammerspoon Spoon that manages bookmarks and makes searching the web snappy.
 ```lua
 hs.loadSpoon("Zing")
 spoon.Zing:bindHotkeys({
-    show = {{"cmd", "alt"}, "z"} -- Customize this hotkey as desired
+    show = {{"ctrl", "cmd", "alt"}, "space"} -- Customize this hotkey as desired
 })
 spoon.Zing:start()
 ```
@@ -27,14 +27,14 @@ Zing provides a quick input interface for:
 ### Configuration
 
 ```lua
--- Set width of the input field (optional)
-spoon.Zing.inputWidth = 30  -- Default is 20
+-- Set width of the input field (optional; default - 20)
+spoon.Zing.inputWidth = 30
 
--- Configure default search engine (optional)
-spoon.Zing.searchEngine = "https://duckduckgo.com/{%?q=%@%}"  -- Default is Google
+-- Configure default search engine (optional; default - Google)
+spoon.Zing.searchEngine = "https://duckduckgo.com/{%?q=%@%}"
 
--- Configure default URL scheme (optional)
-spoon.Zing.defaultScheme = "https"  -- Default is https
+-- Configure default URL scheme (optional; default - https)
+spoon.Zing.defaultScheme = "https"
 
 -- Configure bookmarks
 spoon.Zing.bookmarks = {
@@ -43,7 +43,6 @@ spoon.Zing.bookmarks = {
     ["wiki"] = "https://en.wikipedia.org/wiki/{%Special:Search?search=%@%}",
     ["yt"] = "https://youtube.com/{%results?search_query=%@%}",
     ["map"] = "https://www.google.com/maps/{%?q=%@%}",
-    ["translate"] = "https://translate.google.com/{%?sl=%1&tl=%2&text=%3%}",
     
     -- Example of a function-based bookmark
     ["tz"] = function(hour)
@@ -57,20 +56,22 @@ spoon.Zing.bookmarks = {
 }
 ```
 
-### Examples
+### Query
 
 1. **Direct search**: Simply type your search query and press Enter
    - This will use your configured search engine
 
 2. **URL navigation**: Type a URL (with or without `http://` prefix) and press Enter
-   - `example.com` → opens `https://example.com`
+   - `www.example.com` → opens `https://example.com`
    - `http://example.org` → opens as specified
 
 3. **Bookmark usage**: Type a bookmark name followed by parameters
    - `g hammerspoon` → searches Google for "hammerspoon"
    - `wiki lua` → searches Wikipedia for "lua"
-   - `translate en es hello` → translates "hello" from English to Spanish
    - `tz 3` → shows time conversion 3 hours from now
+
+_NOTE_ if no parameters are specified, the template regions will be removed and the
+bookmark will open as normal.
 
 ### Template Syntax
 
@@ -83,10 +84,7 @@ When defining URL templates for bookmarks, you can use these placeholder pattern
 
 ## Advanced Usage
 
-### Logging
-
-You can adjust the logging level for debugging:
-
 ```lua
-spoon.Zing.logger.setLogLevel('debug')  -- Options: 'verbose', 'debug', 'info', 'warning', 'error'
+-- Change the log level for additional feedback
+spoon.Zing.logger.setLogLevel('debug')
 ```
