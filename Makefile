@@ -16,8 +16,8 @@ build-zip: preflight
 	mkdir -p "$(BASEDIR)/build"
 	cp -a "$(BASEDIR)/src/" "$(BASEDIR)/build/$(APPNAME).spoon"
 	mkdir -p "$(BASEDIR)/dist"
-	zip -9r "$(BASEDIR)/dist/$(APPNAME)-$(APPVER).zip" "$(BASEDIR)/build/$(APPNAME).spoon"
-	@echo "Spoon is available at $(APPNAME)-$(APPVER).zip"
+	cd "$(BASEDIR)/build" && \
+		zip -9r "$(BASEDIR)/dist/$(APPNAME)-$(APPVER).zip" "$(APPNAME).spoon"
 
 
 .PHONY: build-docs
