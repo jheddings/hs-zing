@@ -71,7 +71,7 @@ obj.bookmarks = { }
 ---
 --- Returns:
 ---  * A boolean indicating whether the text appears to be a URL
-function obj.isURL(text)
+local function isURL(text)
     if type(text) ~= "string" then
         return false
     end
@@ -221,7 +221,7 @@ function obj:_handleQueryText(text)
         return self:_handleBookmark(text)
     end
 
-    if obj.isURL(text) then
+    if isURL(text) then
         return obj:_handleWebsiteQuery(text)
     end
 
@@ -297,7 +297,7 @@ end
 ---    * Bookmark suggestions are shown if the query matches any bookmark names
 function obj:_queryChangedCallback(query)
     local choices = { }
-    local subText = obj.isURL(query) and "Press Enter to open URL" or "Press Enter to search"
+    local subText = isURL(query) and "Press Enter to open URL" or "Press Enter to search"
 
     -- Add the main query option
     table.insert(choices, {
