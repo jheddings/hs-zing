@@ -39,7 +39,7 @@ spoon.Zing.defaultScheme = "https"
 -- Configure bookmarks
 spoon.Zing.bookmarks = {
     ["g"] = "https://google.com/{%?q=%@%}",
-    ["gh"] = "https://github.com/{%search?q=%@%}",
+    ["gh"] = "https://github.com/{%%1/%2%}",
     ["wiki"] = "https://en.wikipedia.org/wiki/{%Special:Search?search=%@%}",
     ["yt"] = "https://youtube.com/{%results?search_query=%@%}",
     ["map"] = "https://www.google.com/maps/{%?q=%@%}",
@@ -67,6 +67,7 @@ spoon.Zing.bookmarks = {
 
 3. **Bookmark usage**: Type a bookmark name followed by parameters
    - `g hammerspoon` → searches Google for "hammerspoon"
+   - `gh jheddings hs-zing` → go to `jheddings hs-zing` repo on GitHub
    - `wiki lua` → searches Wikipedia for "lua"
    - `tz 3` → shows time conversion 3 hours from now
 
