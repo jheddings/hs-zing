@@ -333,25 +333,28 @@ function obj:show()
     return self
 end
 
---- Zing:bindHotkeys(mapping)
+--- Zing:bind(keymods, keyname)
 --- Method
 --- Binds hotkeys for Zing
 ---
 --- Parameters:
----  * mapping - A table containing hotkey modifier/key details for the following (optional) items:
----   * show - This will display the Zing chooser
+---  * keymods - A table containing keyboard modifiers
+---  * keyname - A string containing the name of a keyboard key
 ---
 --- Returns:
 ---  * The Zing object
-function obj:bindHotkeys(mapping)
+function obj:bind(keymods, keyname)
     if (self.hotkeyShow) then
         self.hotkeyShow:delete()
     end
 
-    local toggleMods = mapping["show"][1]
-    local toggleKey = mapping["show"][2]
-
-    self.hotkeyShow = hs.hotkey.new(toggleMods, toggleKey, function() self:show() end)
+    self.hotkeyShow = hs.hotkey.new(
+        keymods,
+        keyname,
+        function()
+            self:show()
+        end
+    )
 
     return self
 end
