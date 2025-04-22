@@ -108,7 +108,7 @@ spoon.Zing:stop()
 spoon.Zing:show()
 
 -- Bind a hotkey to show the Zing interface
-spoon.Zing:bind({"ctrl", "cmd", "alt"}, "space")
+spoon.Zing:bindHotKey({"ctrl", "cmd", "alt"}, "space")
 ```
 
 ## Development
