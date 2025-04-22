@@ -1,4 +1,4 @@
-# Makefile for hs-zing
+# Makefile for hs-snapster
 
 BASEDIR ?= $(PWD)
 SRCDIR ?= $(BASEDIR)/src
@@ -29,6 +29,12 @@ build-docs: preflight
 build: build-docs build-zip
 
 
+.PHONY: release
+release: preflight
+	git tag "v$(APPVER)" main
+	git push origin "v$(APPVER)"
+
+
 .PHONY: static-checks
 static-checks:
 	@echo "Static checks passed."
@@ -36,17 +42,22 @@ static-checks:
 
 .PHONY: unit-tests
 unit-tests:
-	@echo "Unit tests passed."
+	for test in $(BASEDIR)/tests/test_*.lua; do lua "$$test"; done
+
+
+.PHONY: integration-tests
+integration-tests:
+	for test in $(BASEDIR)/tests/hs_*.lua; do hs "$$test"; done
+
+
+.PHONY: test
+test: unit-tests integration-tests
+	@echo "All tests passed."
 
 
 .PHONY: preflight
 preflight: static-checks unit-tests
 	@echo "Preflight checks passed."
-
-
-.PHONY: test
-test: unit-tests
-	hs "$(BASEDIR)/tests/ztest.lua"
 
 
 .PHONY: clean
