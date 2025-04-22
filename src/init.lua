@@ -15,7 +15,7 @@ obj.__index = obj
 
 -- Metadata
 obj.name = "Zing"
-obj.version = "1.0"
+obj.version = "1.1"
 obj.author = "Jason Heddings"
 obj.license = "MIT"
 
