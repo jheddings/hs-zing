@@ -333,7 +333,7 @@ function obj:show()
     return self
 end
 
---- Zing:bind(keymods, keyname)
+--- Zing:bindHotKey(keymods, keyname)
 --- Method
 --- Binds hotkeys for Zing
 ---
@@ -343,7 +343,7 @@ end
 ---
 --- Returns:
 ---  * The Zing object
-function obj:bind(keymods, keyname)
+function obj:bindHotKey(keymods, keyname)
     if (self.hotkeyShow) then
         self.hotkeyShow:delete()
     end

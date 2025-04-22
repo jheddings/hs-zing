@@ -11,8 +11,10 @@ A Hammerspoon Spoon that manages bookmarks and makes searching the web snappy.
 
 ```lua
 hs.loadSpoon("Zing")
+
 -- Bind a hotkey to show the Zing interface
-spoon.Zing:bind({"ctrl", "cmd", "alt"}, "space")
+spoon.Zing:bindHotKey({"ctrl", "cmd", "alt"}, "space")
+
 -- Start the Zing service
 spoon.Zing:start()
 ```
