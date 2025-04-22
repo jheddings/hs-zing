@@ -11,9 +11,9 @@ A Hammerspoon Spoon that manages bookmarks and makes searching the web snappy.
 
 ```lua
 hs.loadSpoon("Zing")
-spoon.Zing:bindHotkeys({
-    show = {{"ctrl", "cmd", "alt"}, "space"} -- Customize this hotkey as desired
-})
+-- Bind a hotkey to show the Zing interface
+spoon.Zing:bind({"ctrl", "cmd", "alt"}, "space")
+-- Start the Zing service
 spoon.Zing:start()
 ```
 
@@ -88,4 +88,42 @@ When defining URL templates for bookmarks, you can use these placeholder pattern
 ```lua
 -- Change the log level for additional feedback
 spoon.Zing.logger.setLogLevel('debug')
+```
+
+### API Methods
+
+```lua
+-- Initialize the Zing chooser
+spoon.Zing:init()
+
+-- Start Zing and enable hotkeys
+spoon.Zing:start()
+
+-- Stop Zing and disable hotkeys
+spoon.Zing:stop()
+
+-- Show the Zing chooser interface
+spoon.Zing:show()
+
+-- Bind a hotkey to show the Zing interface
+spoon.Zing:bind({"ctrl", "cmd", "alt"}, "space")
+```
+
+## Development
+
+### Building from Source
+
+1. Clone the repository
+2. Run make build to build the Spoon
+3. The built Spoon will be available in the build directory
+
+
+### Running Tests
+
+```shell
+# Run basic checks
+make preflight
+
+# Run all tests
+make test
 ```
