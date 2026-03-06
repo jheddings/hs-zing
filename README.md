@@ -1,6 +1,6 @@
 # Zing
 
-A Hammerspoon Spoon that manages bookmarks and makes searching the web snappy.
+A Hammerspoon Spoon that manages shortcuts and makes searching the web snappy.
 
 ## Installation
 
@@ -23,7 +23,7 @@ spoon.Zing:start()
 
 Zing provides a quick input interface for:
 - Searching the web
-- Opening bookmarked URLs with optional parameters
+- Opening shortcut URLs with optional parameters
 - Opening direct URLs
 
 ### Configuration
@@ -38,15 +38,21 @@ spoon.Zing.searchEngine = "https://duckduckgo.com/{%?q=%@%}"
 -- Configure default URL scheme (optional; default - https)
 spoon.Zing.defaultScheme = "https"
 
--- Configure bookmarks
-spoon.Zing.bookmarks = {
+-- Configure shortcuts
+spoon.Zing.shortcuts = {
     ["g"] = "https://google.com/{%?q=%@%}",
     ["gh"] = "https://github.com/{%%1/%2%}",
     ["wiki"] = "https://en.wikipedia.org/wiki/{%Special:Search?search=%@%}",
     ["yt"] = "https://youtube.com/{%results?search_query=%@%}",
     ["map"] = "https://www.google.com/maps/{%?q=%@%}",
-    
-    -- Example of a function-based bookmark
+
+    -- Shortcut with a custom description (shown in chooser)
+    ["jira"] = {
+        url = "https://jira.example.com/{%browse/%1%}",
+        desc = "JIRA ticket"
+    },
+
+    -- Function-based shortcut
     ["tz"] = function(hour)
         local myTime = os.time()
         if hour and hour ~= "" then
@@ -54,9 +60,26 @@ spoon.Zing.bookmarks = {
         end
         local timestamp = os.date("!%Y%m%dT%H%M%S", myTime)
         return "https://www.timeanddate.com/worldclock/converter.html?&p1=75&p2=136&iso=" .. timestamp
-    end
+    end,
+
+    -- Function shortcut with description (returns nil = handles its own action)
+    ["cmd"] = {
+        fn = function(...)
+            local args = {...}
+            local command = table.concat(args, " ")
+            if command == "" then
+                hs.application.launchOrFocus("Terminal")
+            else
+                hs.execute(command)
+            end
+        end,
+        desc = "Run command"
+    },
 }
 ```
+
+_NOTE_ `spoon.Zing.bookmarks` is still supported for backward compatibility but is deprecated.
+Use `spoon.Zing.shortcuts` instead.
 
 ### Query
 
@@ -67,18 +90,18 @@ spoon.Zing.bookmarks = {
    - `www.example.com` → opens `https://example.com`
    - `http://example.org` → opens as specified
 
-3. **Bookmark usage**: Type a bookmark name followed by parameters
+3. **Shortcut usage**: Type a shortcut name followed by parameters
    - `g hammerspoon` → searches Google for "hammerspoon"
    - `gh jheddings hs-zing` → go to `jheddings hs-zing` repo on GitHub
    - `wiki lua` → searches Wikipedia for "lua"
    - `tz 3` → shows time conversion 3 hours from now
 
 _NOTE_ if no parameters are specified, the template regions will be removed and the
-bookmark will open as normal.
+shortcut will open as normal.
 
 ### Template Syntax
 
-When defining URL templates for bookmarks, you can use these placeholder patterns:
+When defining URL templates for shortcuts, you can use these placeholder patterns:
 
 - `%@` - Replaced with all parameters joined by spaces
 - `%1`, `%2`, etc. - Replaced with the parameter at that position

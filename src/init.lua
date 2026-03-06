@@ -1,11 +1,11 @@
 --- === Zing ===
 ---
---- Zing is a Hammerspoon spoon that provides a quick way to search the web, open bookmarks, or
+--- Zing is a Hammerspoon spoon that provides a quick way to search the web, open shortcuts, or
 --- open URLs directly from a text input. It uses a chooser interface to allow users to enter
 --- queries and select from a list of suggestions.
 
 -- Other patterns used in this script
-local BOOKMARK_PATTERN = "^%s*(%S+)%s*(.*)"
+local SHORTCUT_PATTERN = "^%s*(%S+)%s*(.*)"
 
 local parser_lua = hs.spoons.resourcePath("parser.lua")
 local TemplateParser = dofile(parser_lua)
@@ -15,7 +15,7 @@ obj.__index = obj
 
 -- Metadata
 obj.name = "Zing"
-obj.version = "1.1"
+obj.version = "1.2"
 obj.author = "Jason Heddings"
 obj.license = "MIT"
 
@@ -30,16 +30,16 @@ obj.defaultScheme = "https"
 obj.searchEngine = "https://google.com/{%?q=%@%}"
 obj.inputWidth = 20
 
---- Zing.bookmarks
+--- Zing.shortcuts
 --- Variable
---- A table of bookmarks that can be used to quickly access URLs.
+--- A table of shortcuts that can be used to quickly access URLs.
 ---
---- This table is a key-value pair where the key is a string representing the bookmark name
+--- This table is a key-value pair where the key is a string representing the shortcut name
 --- and the value is either a string representing the URL or a function that generates the URL.
 ---
 --- The URL can contain placeholders that will be replaced with the provided arguments.
 ---
---- Supported placeholders in URL bookmarks:
+--- Supported placeholders in URL shortcuts:
 --- - `%@` for the entire query string
 --- - `%1`, `%2`, etc. for positional arguments
 --- - `{%...%}` will be removed if no arguments are provided
@@ -48,7 +48,7 @@ obj.inputWidth = 20
 --- are passed to the function in the order they appear in the user query string.
 ---
 --- Example:
----   Zing.bookmarks = {
+---   Zing.shortcuts = {
 ---       ["g"] = "https://google.com/{%?q=%@%}",
 ---       ["$"] = "https://www.xe.com/currencyconverter/convert/{%?Amount=%1&From=%2&To=%3%}",
 ---       ["tz"] = function(hour)
@@ -60,6 +60,7 @@ obj.inputWidth = 20
 ---           return "https://www.timeanddate.com/worldclock/converter.html?&p1=75&p2=136&iso=" .. timestamp
 ---       end
 ---   }
+obj.shortcuts = { }
 obj.bookmarks = { }
 
 --- isURL(text)
@@ -84,36 +85,76 @@ local function isURL(text)
     return false
 end
 
---- Zing:_parseBookmark(text)
+--- Zing:_parseShortcut(text)
 --- Method
---- Parse a string that may contain a bookmark followed by additional search terms
+--- Parse a string that may contain a shortcut followed by additional search terms
 ---
 --- Parameters:
----  * text - A string that potentially contains a bookmark name followed by search terms
+---  * text - A string that potentially contains a shortcut name followed by search terms
 ---
 --- Returns:
----  * bookmark - The bookmark name if found, or nil
----  * rest - The remaining text after the bookmark, or nil if no bookmark was found
-function obj:_parseBookmark(text)
-    local bookmark, rest = text:match(BOOKMARK_PATTERN)
-    if bookmark and self.bookmarks[bookmark] then
-        return bookmark, rest
+---  * shortcut - The shortcut name if found, or nil
+---  * rest - The remaining text after the shortcut, or nil if no shortcut was found
+function obj:_parseShortcut(text)
+    local shortcut, rest = text:match(SHORTCUT_PATTERN)
+    if shortcut and self.shortcuts[shortcut] then
+        return shortcut, rest
     end
     return nil, nil
 end
 
---- Zing:_isBookmark(text)
+--- Zing:_isShortcut(text)
 --- Method
---- Check if a string is a valid bookmark or starts with a bookmark
+--- Check if a string is a valid shortcut or starts with a shortcut
 ---
 --- Parameters:
 ---  * text - The string to check
 ---
 --- Returns:
----  * A boolean indicating whether the text starts with a valid bookmark
-function obj:_isBookmark(text)
-    local bookmark, _ = self:_parseBookmark(text)
-    return bookmark ~= nil
+---  * A boolean indicating whether the text starts with a valid shortcut
+function obj:_isShortcut(text)
+    local shortcut, _ = self:_parseShortcut(text)
+    return shortcut ~= nil
+end
+
+--- Zing:_resolveShortcut(key)
+--- Method
+--- Resolves a shortcut entry into a canonical form
+---
+--- Parameters:
+---  * key - The shortcut key to resolve
+---
+--- Returns:
+---  * A table with {url, fn, desc} fields, or nil if key doesn't exist
+function obj:_resolveShortcut(key)
+    local entry = self.shortcuts[key]
+    if entry == nil then
+        return nil
+    end
+
+    local kind = type(entry)
+
+    if kind == "string" then
+        local domain = entry:match("://([^/]+)") or entry
+        return { url = entry, desc = domain }
+    end
+
+    if kind == "function" then
+        return { fn = entry, desc = "Shortcut" }
+    end
+
+    if kind == "table" then
+        if entry.url then
+            local desc = entry.desc or entry.url:match("://([^/]+)") or entry.url
+            return { url = entry.url, desc = desc }
+        end
+        if entry.fn then
+            local desc = entry.desc or "Shortcut"
+            return { fn = entry.fn, desc = desc }
+        end
+    end
+
+    return nil
 end
 
 --- Zing:_processTemplate(text, ...)
@@ -136,32 +177,37 @@ function obj:_processTemplate(text, ...)
     return self.parser:parse(text, ...)
 end
 
---- Zing:_handleBookmark(text)
+--- Zing:_handleShortcut(text)
 --- Method
---- Process a bookmark and its parameters into a URL
+--- Process a shortcut and its parameters into a URL
 ---
 --- Parameters:
----  * text - A string containing a bookmark name followed by optional parameters
+---  * text - A string containing a shortcut name followed by optional parameters
 ---
 --- Returns:
----  * The generated URL, or nil if the text doesn't start with a valid bookmark
-function obj:_handleBookmark(text)
-    local bookmark, rest = self:_parseBookmark(text)
+---  * The generated URL, or nil if the text doesn't start with a valid shortcut
+function obj:_handleShortcut(text)
+    local name, rest = self:_parseShortcut(text)
 
-    if bookmark then
-        local target = self.bookmarks[bookmark]
-        local params = hs.fnutils.split(rest, "%s+")
-        local kind = type(target)
+    if not name then
+        return nil
+    end
 
-        self.logger.d("Processing bookmark:", bookmark, " [", kind, "]")
+    local shortcut = self:_resolveShortcut(name)
+    if not shortcut then
+        return nil
+    end
 
-        if kind == "function" then
-            self.logger.d("Executing function:", bookmark, "{", table.concat(params, ", "), "}")
-            return target(table.unpack(params))
-        else
-            self.logger.d("Processing template:", bookmark, "->", target, "? {", table.concat(params, ", "), "}")
-            return self:_processTemplate(target, table.unpack(params))
-        end
+    local params = hs.fnutils.split(rest, "%s+")
+
+    if shortcut.fn then
+        self.logger.d("Executing function shortcut:", name)
+        return shortcut.fn(table.unpack(params))
+    end
+
+    if shortcut.url then
+        self.logger.d("Processing URL shortcut:", name, "->", shortcut.url)
+        return self:_processTemplate(shortcut.url, table.unpack(params))
     end
 
     return nil
@@ -206,7 +252,7 @@ end
 --- Process a user query and return an appropriate URL
 ---
 --- Parameters:
----  * text - User query text that might be a bookmark, URL, or search query
+---  * text - User query text that might be a shortcut, URL, or search query
 ---
 --- Returns:
 ---  * A URL to open, or nil if the text couldn't be processed
@@ -217,8 +263,8 @@ function obj:_handleQueryText(text)
 
     self.logger.v("Processing user query:", text)
 
-    if self:_isBookmark(text) then
-        return self:_handleBookmark(text)
+    if self:_isShortcut(text) then
+        return self:_handleShortcut(text)
     end
 
     if isURL(text) then
@@ -228,30 +274,24 @@ function obj:_handleQueryText(text)
     return obj:_handleSearchQuery(text)
 end
 
---- Zing:_createBookmarkChoice(key)
+--- Zing:_createShortcutChoice(key)
 --- Method
---- Create a choice object for a specific bookmark
+--- Create a choice object for a specific shortcut
 ---
 --- Parameters:
----  * key - The bookmark key to create a choice for
+---  * key - The shortcut key to create a choice for
 ---
 --- Returns:
 ---  * A choice table for use with hs.chooser
-function obj:_createBookmarkChoice(key)
-    local target = self.bookmarks[key]
-    local subText
-
-    -- TODO indicate number of arguments for function
-    if type(target) == "function" then
-        subText = "Function: execute"
-    else
-        -- For URLs with parameters, show the domain only
-        subText = target:match("://([^/]+)")
+function obj:_createShortcutChoice(key)
+    local shortcut = self:_resolveShortcut(key)
+    if not shortcut then
+        return nil
     end
 
     return {
         ["text"] = key,
-        ["subText"] = subText
+        ["subText"] = shortcut.desc
     }
 end
 
@@ -271,15 +311,16 @@ function obj:_completionCallback(choice)
     end
 
     local text = choice.text
+    local is_shortcut = self:_isShortcut(text)
     local url = self:_handleQueryText(text)
 
-    if not url then
+    if url and type(url) == "string" then
+        self.logger.d("Opening URL:", url)
+        hs.urlevent.openURL(url)
+    elseif not is_shortcut then
         hs.alert.show("Invalid query")
         return false
     end
-
-    self.logger.d("Opening URL:", url)
-    hs.urlevent.openURL(url)
 
     return true
 end
@@ -294,22 +335,36 @@ end
 --- Notes:
 ---  * This updates the list of choices shown in the chooser:
 ---    * The current query is always shown as the first choice
----    * Bookmark suggestions are shown if the query matches any bookmark names
+---    * Shortcut suggestions are shown if the query matches any shortcut names
 function obj:_queryChangedCallback(query)
     local choices = { }
-    local subText = isURL(query) and "Press Enter to open URL" or "Press Enter to search"
 
-    -- Add the main query option
-    table.insert(choices, {
-        ["text"] = query,
-        ["subText"] = subText
-    })
+    if self:_isShortcut(query) then
+        -- Query starts with a valid shortcut; show single choice with shortcut description
+        local name, _ = self:_parseShortcut(query)
+        local shortcut = self:_resolveShortcut(name)
+        table.insert(choices, {
+            ["text"] = query,
+            ["subText"] = shortcut and shortcut.desc or "Shortcut"
+        })
+    else
+        local subText = isURL(query) and "Press Enter to open URL" or "Press Enter to search"
 
-    -- Add bookmark suggestions that match the query
-    local queryLower = query:lower()
-    for key, _ in pairs(self.bookmarks) do
-        if key:lower():find(queryLower, 1, true) then
-            table.insert(choices, self:_createBookmarkChoice(key))
+        -- Add the main query option
+        table.insert(choices, {
+            ["text"] = query,
+            ["subText"] = subText
+        })
+
+        -- Add shortcut suggestions that match the query
+        local queryLower = query:lower()
+        for key, _ in pairs(self.shortcuts) do
+            if key:lower():find(queryLower, 1, true) then
+                local choice = self:_createShortcutChoice(key)
+                if choice then
+                    table.insert(choices, choice)
+                end
+            end
         end
     end
 
@@ -368,7 +423,7 @@ end
 function obj:init()
     self.chooser = hs.chooser.new(function(choice) return self:_completionCallback(choice) end)
 
-    self.chooser:placeholderText("Enter URL, bookmark, or search query")
+    self.chooser:placeholderText("Enter URL, shortcut, or search query")
     self.chooser:searchSubText(false)
     self.chooser:queryChangedCallback(function(query) self:_queryChangedCallback(query) end)
 
@@ -384,6 +439,14 @@ end
 --- Returns:
 ---  * The Zing object
 function obj:start()
+    -- Backward compatibility: migrate bookmarks to shortcuts
+    if next(self.bookmarks) ~= nil and next(self.shortcuts) == nil then
+        self.logger.w("Zing.bookmarks is deprecated, use Zing.shortcuts instead")
+        for k, v in pairs(self.bookmarks) do
+            self.shortcuts[k] = v
+        end
+    end
+
     self.chooser:width(self.inputWidth)
 
     if (self.hotkeyShow) then
