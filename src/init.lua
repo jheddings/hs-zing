@@ -61,6 +61,7 @@ obj.inputWidth = 20
 ---       end
 ---   }
 obj.shortcuts = { }
+obj.bookmarks = { }
 
 --- isURL(text)
 --- Function
@@ -424,6 +425,14 @@ end
 --- Returns:
 ---  * The Zing object
 function obj:start()
+    -- Backward compatibility: migrate bookmarks to shortcuts
+    if next(self.bookmarks) ~= nil and next(self.shortcuts) == nil then
+        self.logger.w("Zing.bookmarks is deprecated, use Zing.shortcuts instead")
+        for k, v in pairs(self.bookmarks) do
+            self.shortcuts[k] = v
+        end
+    end
+
     self.chooser:width(self.inputWidth)
 
     if (self.hotkeyShow) then
