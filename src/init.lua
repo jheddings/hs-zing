@@ -63,15 +63,7 @@ obj.inputWidth = 20
 obj.shortcuts = { }
 obj.bookmarks = { }
 
---- isURL(text)
---- Function
---- Check if a string looks like a URL
----
---- Parameters:
----  * text - The string to check
----
---- Returns:
----  * A boolean indicating whether the text appears to be a URL
+-- Check if a string looks like a URL
 local function isURL(text)
     if type(text) ~= "string" then
         return false
