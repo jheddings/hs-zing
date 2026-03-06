@@ -116,6 +116,46 @@ function obj:_isShortcut(text)
     return shortcut ~= nil
 end
 
+--- Zing:_resolveShortcut(key)
+--- Method
+--- Resolves a shortcut entry into a canonical form
+---
+--- Parameters:
+---  * key - The shortcut key to resolve
+---
+--- Returns:
+---  * A table with {url, fn, desc} fields, or nil if key doesn't exist
+function obj:_resolveShortcut(key)
+    local entry = self.shortcuts[key]
+    if entry == nil then
+        return nil
+    end
+
+    local kind = type(entry)
+
+    if kind == "string" then
+        local domain = entry:match("://([^/]+)") or entry
+        return { url = entry, desc = domain }
+    end
+
+    if kind == "function" then
+        return { fn = entry, desc = "Shortcut" }
+    end
+
+    if kind == "table" then
+        if entry.url then
+            local desc = entry.desc or entry.url:match("://([^/]+)") or entry.url
+            return { url = entry.url, desc = desc }
+        end
+        if entry.fn then
+            local desc = entry.desc or "Shortcut"
+            return { fn = entry.fn, desc = desc }
+        end
+    end
+
+    return nil
+end
+
 --- Zing:_processTemplate(text, ...)
 --- Method
 --- Expand placeholders in a URL text with the provided parameters
@@ -146,22 +186,27 @@ end
 --- Returns:
 ---  * The generated URL, or nil if the text doesn't start with a valid shortcut
 function obj:_handleShortcut(text)
-    local shortcut, rest = self:_parseShortcut(text)
+    local name, rest = self:_parseShortcut(text)
 
-    if shortcut then
-        local target = self.shortcuts[shortcut]
-        local params = hs.fnutils.split(rest, "%s+")
-        local kind = type(target)
+    if not name then
+        return nil
+    end
 
-        self.logger.d("Processing shortcut:", shortcut, " [", kind, "]")
+    local shortcut = self:_resolveShortcut(name)
+    if not shortcut then
+        return nil
+    end
 
-        if kind == "function" then
-            self.logger.d("Executing function:", shortcut, "{", table.concat(params, ", "), "}")
-            return target(table.unpack(params))
-        else
-            self.logger.d("Processing template:", shortcut, "->", target, "? {", table.concat(params, ", "), "}")
-            return self:_processTemplate(target, table.unpack(params))
-        end
+    local params = hs.fnutils.split(rest, "%s+")
+
+    if shortcut.fn then
+        self.logger.d("Executing function shortcut:", name)
+        return shortcut.fn(table.unpack(params))
+    end
+
+    if shortcut.url then
+        self.logger.d("Processing URL shortcut:", name, "->", shortcut.url)
+        return self:_processTemplate(shortcut.url, table.unpack(params))
     end
 
     return nil
@@ -238,20 +283,14 @@ end
 --- Returns:
 ---  * A choice table for use with hs.chooser
 function obj:_createShortcutChoice(key)
-    local target = self.shortcuts[key]
-    local subText
-
-    -- TODO indicate number of arguments for function
-    if type(target) == "function" then
-        subText = "Function: execute"
-    else
-        -- For URLs with parameters, show the domain only
-        subText = target:match("://([^/]+)")
+    local shortcut = self:_resolveShortcut(key)
+    if not shortcut then
+        return nil
     end
 
     return {
         ["text"] = key,
-        ["subText"] = subText
+        ["subText"] = shortcut.desc
     }
 end
 
