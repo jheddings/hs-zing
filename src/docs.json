@@ -1,0 +1,846 @@
+[
+  {
+    "Constant" : [
+
+    ],
+    "submodules" : [
+
+    ],
+    "Function" : [
+
+    ],
+    "Variable" : [
+      {
+        "doc" : "A table of shortcuts that can be used to quickly access URLs.\n\nThis table is a key-value pair where the key is a string representing the shortcut name\nand the value is either a string representing the URL or a function that generates the URL.\n\nThe URL can contain placeholders that will be replaced with the provided arguments.\n\nSupported placeholders in URL shortcuts:\n- `%@` for the entire query string\n- `%1`, `%2`, etc. for positional arguments\n- `{%...%}` will be removed if no arguments are provided\n\nFunctions can be used to generate dynamic URLs based on the provided arguments.  Arguments\nare passed to the function in the order they appear in the user query string.\n\nExample:\n  Zing.shortcuts = {\n      [\"g\"] = \"https:\/\/google.com\/{%?q=%@%}\",\n      [\"$\"] = \"https:\/\/www.xe.com\/currencyconverter\/convert\/{%?Amount=%1&From=%2&To=%3%}\",\n      [\"tz\"] = function(hour)\n          local myTime = os.time()\n          if hour and hour ~= \"\" then\n              myTime = myTime + (tonumber(hour) * 3600)\n          end\n          local timestamp = os.date(\"!%Y%m%dT%H%M%S\", myTime)\n          return \"https:\/\/www.timeanddate.com\/worldclock\/converter.html?&p1=75&p2=136&iso=\" .. timestamp\n      end\n  }",
+        "stripped_doc" : [
+          "A table of shortcuts that can be used to quickly access URLs.",
+          "",
+          "This table is a key-value pair where the key is a string representing the shortcut name",
+          "and the value is either a string representing the URL or a function that generates the URL.",
+          "",
+          "The URL can contain placeholders that will be replaced with the provided arguments.",
+          "",
+          "Supported placeholders in URL shortcuts:",
+          "- `%@` for the entire query string",
+          "- `%1`, `%2`, etc. for positional arguments",
+          "- `{%...%}` will be removed if no arguments are provided",
+          "",
+          "Functions can be used to generate dynamic URLs based on the provided arguments.  Arguments",
+          "are passed to the function in the order they appear in the user query string.",
+          "",
+          "Example:",
+          "  Zing.shortcuts = {",
+          "      [\"g\"] = \"https:\/\/google.com\/{%?q=%@%}\",",
+          "      [\"$\"] = \"https:\/\/www.xe.com\/currencyconverter\/convert\/{%?Amount=%1&From=%2&To=%3%}\",",
+          "      [\"tz\"] = function(hour)",
+          "          local myTime = os.time()",
+          "          if hour and hour ~= \"\" then",
+          "              myTime = myTime + (tonumber(hour) * 3600)",
+          "          end",
+          "          local timestamp = os.date(\"!%Y%m%dT%H%M%S\", myTime)",
+          "          return \"https:\/\/www.timeanddate.com\/worldclock\/converter.html?&p1=75&p2=136&iso=\" .. timestamp",
+          "      end",
+          "  }"
+        ],
+        "parameters" : [
+
+        ],
+        "desc" : "A table of shortcuts that can be used to quickly access URLs.",
+        "notes" : [
+
+        ],
+        "signature" : "Zing.shortcuts",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "name" : "shortcuts",
+        "def" : "Zing.shortcuts"
+      }
+    ],
+    "stripped_doc" : [
+
+    ],
+    "Deprecated" : [
+
+    ],
+    "type" : "Module",
+    "desc" : "Zing is a Hammerspoon spoon that provides a quick way to search the web, open shortcuts, or",
+    "Constructor" : [
+
+    ],
+    "doc" : "Zing is a Hammerspoon spoon that provides a quick way to search the web, open shortcuts, or\nopen URLs directly from a text input. It uses a chooser interface to allow users to enter\nqueries and select from a list of suggestions.",
+    "Method" : [
+      {
+        "doc" : "Parse a string that may contain a shortcut followed by additional search terms\n\nParameters:\n * text - A string that potentially contains a shortcut name followed by search terms\n\nReturns:\n * shortcut - The shortcut name if found, or nil\n * rest - The remaining text after the shortcut, or nil if no shortcut was found",
+        "stripped_doc" : [
+          "Parse a string that may contain a shortcut followed by additional search terms",
+          ""
+        ],
+        "parameters" : [
+          " * text - A string that potentially contains a shortcut name followed by search terms",
+          ""
+        ],
+        "desc" : "Parse a string that may contain a shortcut followed by additional search terms",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:_parseShortcut(text)",
+        "type" : "Method",
+        "returns" : [
+          " * shortcut - The shortcut name if found, or nil",
+          " * rest - The remaining text after the shortcut, or nil if no shortcut was found"
+        ],
+        "name" : "_parseShortcut",
+        "def" : "Zing:_parseShortcut(text)"
+      },
+      {
+        "doc" : "Check if a string is a valid shortcut or starts with a shortcut\n\nParameters:\n * text - The string to check\n\nReturns:\n * A boolean indicating whether the text starts with a valid shortcut",
+        "stripped_doc" : [
+          "Check if a string is a valid shortcut or starts with a shortcut",
+          ""
+        ],
+        "parameters" : [
+          " * text - The string to check",
+          ""
+        ],
+        "desc" : "Check if a string is a valid shortcut or starts with a shortcut",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:_isShortcut(text)",
+        "type" : "Method",
+        "returns" : [
+          " * A boolean indicating whether the text starts with a valid shortcut"
+        ],
+        "name" : "_isShortcut",
+        "def" : "Zing:_isShortcut(text)"
+      },
+      {
+        "doc" : "Resolves a shortcut entry into a canonical form\n\nParameters:\n * key - The shortcut key to resolve\n\nReturns:\n * A table with {url, fn, desc} fields, or nil if key doesn't exist",
+        "stripped_doc" : [
+          "Resolves a shortcut entry into a canonical form",
+          ""
+        ],
+        "parameters" : [
+          " * key - The shortcut key to resolve",
+          ""
+        ],
+        "desc" : "Resolves a shortcut entry into a canonical form",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:_resolveShortcut(key)",
+        "type" : "Method",
+        "returns" : [
+          " * A table with {url, fn, desc} fields, or nil if key doesn't exist"
+        ],
+        "name" : "_resolveShortcut",
+        "def" : "Zing:_resolveShortcut(key)"
+      },
+      {
+        "doc" : "Expand placeholders in a URL text with the provided parameters\n\nParameters:\n * text - The URL text containing placeholders\n * ... - The template parameters for placeholders\n\nReturns:\n * The expanded URL with placeholders replaced\n\nNotes:\n * Use %% to get a literal % in the output (escaping)\n * Use %@ to replace with all parameters joined by a space\n * Use %1, %2, etc. to replace with positional parameters\n * Text within template wrappers {%...%} will be removed if no parameters are provided",
+        "stripped_doc" : [
+          "Expand placeholders in a URL text with the provided parameters",
+          ""
+        ],
+        "parameters" : [
+          " * text - The URL text containing placeholders",
+          " * ... - The template parameters for placeholders",
+          ""
+        ],
+        "desc" : "Expand placeholders in a URL text with the provided parameters",
+        "notes" : [
+          " * Use %% to get a literal % in the output (escaping)",
+          " * Use %@ to replace with all parameters joined by a space",
+          " * Use %1, %2, etc. to replace with positional parameters",
+          " * Text within template wrappers {%...%} will be removed if no parameters are provided"
+        ],
+        "signature" : "Zing:_processTemplate(text, ...)",
+        "type" : "Method",
+        "returns" : [
+          " * The expanded URL with placeholders replaced",
+          ""
+        ],
+        "name" : "_processTemplate",
+        "def" : "Zing:_processTemplate(text, ...)"
+      },
+      {
+        "doc" : "Process a shortcut and its parameters into a URL\n\nParameters:\n * text - A string containing a shortcut name followed by optional parameters\n\nReturns:\n * The generated URL, or nil if the text doesn't start with a valid shortcut",
+        "stripped_doc" : [
+          "Process a shortcut and its parameters into a URL",
+          ""
+        ],
+        "parameters" : [
+          " * text - A string containing a shortcut name followed by optional parameters",
+          ""
+        ],
+        "desc" : "Process a shortcut and its parameters into a URL",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:_handleShortcut(text)",
+        "type" : "Method",
+        "returns" : [
+          " * The generated URL, or nil if the text doesn't start with a valid shortcut"
+        ],
+        "name" : "_handleShortcut",
+        "def" : "Zing:_handleShortcut(text)"
+      },
+      {
+        "doc" : "Process URLs, adding a scheme if needed\n\nParameters:\n * url - A URL string, possibly without a scheme\n\nReturns:\n * A properly formatted URL with a scheme",
+        "stripped_doc" : [
+          "Process URLs, adding a scheme if needed",
+          ""
+        ],
+        "parameters" : [
+          " * url - A URL string, possibly without a scheme",
+          ""
+        ],
+        "desc" : "Process URLs, adding a scheme if needed",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:_handleWebsiteQuery(url)",
+        "type" : "Method",
+        "returns" : [
+          " * A properly formatted URL with a scheme"
+        ],
+        "name" : "_handleWebsiteQuery",
+        "def" : "Zing:_handleWebsiteQuery(url)"
+      },
+      {
+        "doc" : "Process a search query using the default search engine\n\nParameters:\n * text - The search query text\n\nReturns:\n * A URL for the search using the configured search engine",
+        "stripped_doc" : [
+          "Process a search query using the default search engine",
+          ""
+        ],
+        "parameters" : [
+          " * text - The search query text",
+          ""
+        ],
+        "desc" : "Process a search query using the default search engine",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:_handleSearchQuery(text)",
+        "type" : "Method",
+        "returns" : [
+          " * A URL for the search using the configured search engine"
+        ],
+        "name" : "_handleSearchQuery",
+        "def" : "Zing:_handleSearchQuery(text)"
+      },
+      {
+        "doc" : "Process a user query and return an appropriate URL\n\nParameters:\n * text - User query text that might be a shortcut, URL, or search query\n\nReturns:\n * A URL to open, or nil if the text couldn't be processed",
+        "stripped_doc" : [
+          "Process a user query and return an appropriate URL",
+          ""
+        ],
+        "parameters" : [
+          " * text - User query text that might be a shortcut, URL, or search query",
+          ""
+        ],
+        "desc" : "Process a user query and return an appropriate URL",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:_handleQueryText(text)",
+        "type" : "Method",
+        "returns" : [
+          " * A URL to open, or nil if the text couldn't be processed"
+        ],
+        "name" : "_handleQueryText",
+        "def" : "Zing:_handleQueryText(text)"
+      },
+      {
+        "doc" : "Create a choice object for a specific shortcut\n\nParameters:\n * key - The shortcut key to create a choice for\n\nReturns:\n * A choice table for use with hs.chooser",
+        "stripped_doc" : [
+          "Create a choice object for a specific shortcut",
+          ""
+        ],
+        "parameters" : [
+          " * key - The shortcut key to create a choice for",
+          ""
+        ],
+        "desc" : "Create a choice object for a specific shortcut",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:_createShortcutChoice(key)",
+        "type" : "Method",
+        "returns" : [
+          " * A choice table for use with hs.chooser"
+        ],
+        "name" : "_createShortcutChoice",
+        "def" : "Zing:_createShortcutChoice(key)"
+      },
+      {
+        "doc" : "Callback function when a user selects a choice from the chooser\n\nParameters:\n * choice - The selected choice object containing the query text\n\nReturns:\n * Boolean indicating success or failure",
+        "stripped_doc" : [
+          "Callback function when a user selects a choice from the chooser",
+          ""
+        ],
+        "parameters" : [
+          " * choice - The selected choice object containing the query text",
+          ""
+        ],
+        "desc" : "Callback function when a user selects a choice from the chooser",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:_completionCallback(choice)",
+        "type" : "Method",
+        "returns" : [
+          " * Boolean indicating success or failure"
+        ],
+        "name" : "_completionCallback",
+        "def" : "Zing:_completionCallback(choice)"
+      },
+      {
+        "doc" : "Callback function called when the query text in the chooser changes\n\nParameters:\n * query - The current text in the chooser input field\n\nNotes:\n * This updates the list of choices shown in the chooser:\n   * The current query is always shown as the first choice\n   * Shortcut suggestions are shown if the query matches any shortcut names",
+        "stripped_doc" : [
+          "Callback function called when the query text in the chooser changes",
+          ""
+        ],
+        "parameters" : [
+          " * query - The current text in the chooser input field",
+          ""
+        ],
+        "desc" : "Callback function called when the query text in the chooser changes",
+        "notes" : [
+          " * This updates the list of choices shown in the chooser:",
+          "   * The current query is always shown as the first choice",
+          "   * Shortcut suggestions are shown if the query matches any shortcut names"
+        ],
+        "signature" : "Zing:_queryChangedCallback(query)",
+        "type" : "Method",
+        "returns" : [
+
+        ],
+        "name" : "_queryChangedCallback",
+        "def" : "Zing:_queryChangedCallback(query)"
+      },
+      {
+        "doc" : "Show the Zing chooser\n\nReturns:\n * The Zing object",
+        "stripped_doc" : [
+          "Show the Zing chooser",
+          ""
+        ],
+        "parameters" : [
+
+        ],
+        "desc" : "Show the Zing chooser",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:show()",
+        "type" : "Method",
+        "returns" : [
+          " * The Zing object"
+        ],
+        "name" : "show",
+        "def" : "Zing:show()"
+      },
+      {
+        "doc" : "Binds hotkeys for Zing\n\nParameters:\n * keymods - A table containing keyboard modifiers\n * keyname - A string containing the name of a keyboard key\n\nReturns:\n * The Zing object",
+        "stripped_doc" : [
+          "Binds hotkeys for Zing",
+          ""
+        ],
+        "parameters" : [
+          " * keymods - A table containing keyboard modifiers",
+          " * keyname - A string containing the name of a keyboard key",
+          ""
+        ],
+        "desc" : "Binds hotkeys for Zing",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:bindHotKey(keymods, keyname)",
+        "type" : "Method",
+        "returns" : [
+          " * The Zing object"
+        ],
+        "name" : "bindHotKey",
+        "def" : "Zing:bindHotKey(keymods, keyname)"
+      },
+      {
+        "doc" : "Initialize the Zing chooser\n\nReturns:\n * The Zing object",
+        "stripped_doc" : [
+          "Initialize the Zing chooser",
+          ""
+        ],
+        "parameters" : [
+
+        ],
+        "desc" : "Initialize the Zing chooser",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:init()",
+        "type" : "Method",
+        "returns" : [
+          " * The Zing object"
+        ],
+        "name" : "init",
+        "def" : "Zing:init()"
+      },
+      {
+        "doc" : "Start Zing\n\nReturns:\n * The Zing object",
+        "stripped_doc" : [
+          "Start Zing",
+          ""
+        ],
+        "parameters" : [
+
+        ],
+        "desc" : "Start Zing",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:start()",
+        "type" : "Method",
+        "returns" : [
+          " * The Zing object"
+        ],
+        "name" : "start",
+        "def" : "Zing:start()"
+      },
+      {
+        "doc" : "Stops Zing\n\nReturns:\n * The Zing object",
+        "stripped_doc" : [
+          "Stops Zing",
+          ""
+        ],
+        "parameters" : [
+
+        ],
+        "desc" : "Stops Zing",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:stop()",
+        "type" : "Method",
+        "returns" : [
+          " * The Zing object"
+        ],
+        "name" : "stop",
+        "def" : "Zing:stop()"
+      }
+    ],
+    "Command" : [
+
+    ],
+    "Field" : [
+
+    ],
+    "items" : [
+      {
+        "doc" : "A table of shortcuts that can be used to quickly access URLs.\n\nThis table is a key-value pair where the key is a string representing the shortcut name\nand the value is either a string representing the URL or a function that generates the URL.\n\nThe URL can contain placeholders that will be replaced with the provided arguments.\n\nSupported placeholders in URL shortcuts:\n- `%@` for the entire query string\n- `%1`, `%2`, etc. for positional arguments\n- `{%...%}` will be removed if no arguments are provided\n\nFunctions can be used to generate dynamic URLs based on the provided arguments.  Arguments\nare passed to the function in the order they appear in the user query string.\n\nExample:\n  Zing.shortcuts = {\n      [\"g\"] = \"https:\/\/google.com\/{%?q=%@%}\",\n      [\"$\"] = \"https:\/\/www.xe.com\/currencyconverter\/convert\/{%?Amount=%1&From=%2&To=%3%}\",\n      [\"tz\"] = function(hour)\n          local myTime = os.time()\n          if hour and hour ~= \"\" then\n              myTime = myTime + (tonumber(hour) * 3600)\n          end\n          local timestamp = os.date(\"!%Y%m%dT%H%M%S\", myTime)\n          return \"https:\/\/www.timeanddate.com\/worldclock\/converter.html?&p1=75&p2=136&iso=\" .. timestamp\n      end\n  }",
+        "stripped_doc" : [
+          "A table of shortcuts that can be used to quickly access URLs.",
+          "",
+          "This table is a key-value pair where the key is a string representing the shortcut name",
+          "and the value is either a string representing the URL or a function that generates the URL.",
+          "",
+          "The URL can contain placeholders that will be replaced with the provided arguments.",
+          "",
+          "Supported placeholders in URL shortcuts:",
+          "- `%@` for the entire query string",
+          "- `%1`, `%2`, etc. for positional arguments",
+          "- `{%...%}` will be removed if no arguments are provided",
+          "",
+          "Functions can be used to generate dynamic URLs based on the provided arguments.  Arguments",
+          "are passed to the function in the order they appear in the user query string.",
+          "",
+          "Example:",
+          "  Zing.shortcuts = {",
+          "      [\"g\"] = \"https:\/\/google.com\/{%?q=%@%}\",",
+          "      [\"$\"] = \"https:\/\/www.xe.com\/currencyconverter\/convert\/{%?Amount=%1&From=%2&To=%3%}\",",
+          "      [\"tz\"] = function(hour)",
+          "          local myTime = os.time()",
+          "          if hour and hour ~= \"\" then",
+          "              myTime = myTime + (tonumber(hour) * 3600)",
+          "          end",
+          "          local timestamp = os.date(\"!%Y%m%dT%H%M%S\", myTime)",
+          "          return \"https:\/\/www.timeanddate.com\/worldclock\/converter.html?&p1=75&p2=136&iso=\" .. timestamp",
+          "      end",
+          "  }"
+        ],
+        "parameters" : [
+
+        ],
+        "desc" : "A table of shortcuts that can be used to quickly access URLs.",
+        "notes" : [
+
+        ],
+        "signature" : "Zing.shortcuts",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "name" : "shortcuts",
+        "def" : "Zing.shortcuts"
+      },
+      {
+        "doc" : "Callback function when a user selects a choice from the chooser\n\nParameters:\n * choice - The selected choice object containing the query text\n\nReturns:\n * Boolean indicating success or failure",
+        "stripped_doc" : [
+          "Callback function when a user selects a choice from the chooser",
+          ""
+        ],
+        "parameters" : [
+          " * choice - The selected choice object containing the query text",
+          ""
+        ],
+        "desc" : "Callback function when a user selects a choice from the chooser",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:_completionCallback(choice)",
+        "type" : "Method",
+        "returns" : [
+          " * Boolean indicating success or failure"
+        ],
+        "name" : "_completionCallback",
+        "def" : "Zing:_completionCallback(choice)"
+      },
+      {
+        "doc" : "Create a choice object for a specific shortcut\n\nParameters:\n * key - The shortcut key to create a choice for\n\nReturns:\n * A choice table for use with hs.chooser",
+        "stripped_doc" : [
+          "Create a choice object for a specific shortcut",
+          ""
+        ],
+        "parameters" : [
+          " * key - The shortcut key to create a choice for",
+          ""
+        ],
+        "desc" : "Create a choice object for a specific shortcut",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:_createShortcutChoice(key)",
+        "type" : "Method",
+        "returns" : [
+          " * A choice table for use with hs.chooser"
+        ],
+        "name" : "_createShortcutChoice",
+        "def" : "Zing:_createShortcutChoice(key)"
+      },
+      {
+        "doc" : "Process a user query and return an appropriate URL\n\nParameters:\n * text - User query text that might be a shortcut, URL, or search query\n\nReturns:\n * A URL to open, or nil if the text couldn't be processed",
+        "stripped_doc" : [
+          "Process a user query and return an appropriate URL",
+          ""
+        ],
+        "parameters" : [
+          " * text - User query text that might be a shortcut, URL, or search query",
+          ""
+        ],
+        "desc" : "Process a user query and return an appropriate URL",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:_handleQueryText(text)",
+        "type" : "Method",
+        "returns" : [
+          " * A URL to open, or nil if the text couldn't be processed"
+        ],
+        "name" : "_handleQueryText",
+        "def" : "Zing:_handleQueryText(text)"
+      },
+      {
+        "doc" : "Process a search query using the default search engine\n\nParameters:\n * text - The search query text\n\nReturns:\n * A URL for the search using the configured search engine",
+        "stripped_doc" : [
+          "Process a search query using the default search engine",
+          ""
+        ],
+        "parameters" : [
+          " * text - The search query text",
+          ""
+        ],
+        "desc" : "Process a search query using the default search engine",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:_handleSearchQuery(text)",
+        "type" : "Method",
+        "returns" : [
+          " * A URL for the search using the configured search engine"
+        ],
+        "name" : "_handleSearchQuery",
+        "def" : "Zing:_handleSearchQuery(text)"
+      },
+      {
+        "doc" : "Process a shortcut and its parameters into a URL\n\nParameters:\n * text - A string containing a shortcut name followed by optional parameters\n\nReturns:\n * The generated URL, or nil if the text doesn't start with a valid shortcut",
+        "stripped_doc" : [
+          "Process a shortcut and its parameters into a URL",
+          ""
+        ],
+        "parameters" : [
+          " * text - A string containing a shortcut name followed by optional parameters",
+          ""
+        ],
+        "desc" : "Process a shortcut and its parameters into a URL",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:_handleShortcut(text)",
+        "type" : "Method",
+        "returns" : [
+          " * The generated URL, or nil if the text doesn't start with a valid shortcut"
+        ],
+        "name" : "_handleShortcut",
+        "def" : "Zing:_handleShortcut(text)"
+      },
+      {
+        "doc" : "Process URLs, adding a scheme if needed\n\nParameters:\n * url - A URL string, possibly without a scheme\n\nReturns:\n * A properly formatted URL with a scheme",
+        "stripped_doc" : [
+          "Process URLs, adding a scheme if needed",
+          ""
+        ],
+        "parameters" : [
+          " * url - A URL string, possibly without a scheme",
+          ""
+        ],
+        "desc" : "Process URLs, adding a scheme if needed",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:_handleWebsiteQuery(url)",
+        "type" : "Method",
+        "returns" : [
+          " * A properly formatted URL with a scheme"
+        ],
+        "name" : "_handleWebsiteQuery",
+        "def" : "Zing:_handleWebsiteQuery(url)"
+      },
+      {
+        "doc" : "Check if a string is a valid shortcut or starts with a shortcut\n\nParameters:\n * text - The string to check\n\nReturns:\n * A boolean indicating whether the text starts with a valid shortcut",
+        "stripped_doc" : [
+          "Check if a string is a valid shortcut or starts with a shortcut",
+          ""
+        ],
+        "parameters" : [
+          " * text - The string to check",
+          ""
+        ],
+        "desc" : "Check if a string is a valid shortcut or starts with a shortcut",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:_isShortcut(text)",
+        "type" : "Method",
+        "returns" : [
+          " * A boolean indicating whether the text starts with a valid shortcut"
+        ],
+        "name" : "_isShortcut",
+        "def" : "Zing:_isShortcut(text)"
+      },
+      {
+        "doc" : "Parse a string that may contain a shortcut followed by additional search terms\n\nParameters:\n * text - A string that potentially contains a shortcut name followed by search terms\n\nReturns:\n * shortcut - The shortcut name if found, or nil\n * rest - The remaining text after the shortcut, or nil if no shortcut was found",
+        "stripped_doc" : [
+          "Parse a string that may contain a shortcut followed by additional search terms",
+          ""
+        ],
+        "parameters" : [
+          " * text - A string that potentially contains a shortcut name followed by search terms",
+          ""
+        ],
+        "desc" : "Parse a string that may contain a shortcut followed by additional search terms",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:_parseShortcut(text)",
+        "type" : "Method",
+        "returns" : [
+          " * shortcut - The shortcut name if found, or nil",
+          " * rest - The remaining text after the shortcut, or nil if no shortcut was found"
+        ],
+        "name" : "_parseShortcut",
+        "def" : "Zing:_parseShortcut(text)"
+      },
+      {
+        "doc" : "Expand placeholders in a URL text with the provided parameters\n\nParameters:\n * text - The URL text containing placeholders\n * ... - The template parameters for placeholders\n\nReturns:\n * The expanded URL with placeholders replaced\n\nNotes:\n * Use %% to get a literal % in the output (escaping)\n * Use %@ to replace with all parameters joined by a space\n * Use %1, %2, etc. to replace with positional parameters\n * Text within template wrappers {%...%} will be removed if no parameters are provided",
+        "stripped_doc" : [
+          "Expand placeholders in a URL text with the provided parameters",
+          ""
+        ],
+        "parameters" : [
+          " * text - The URL text containing placeholders",
+          " * ... - The template parameters for placeholders",
+          ""
+        ],
+        "desc" : "Expand placeholders in a URL text with the provided parameters",
+        "notes" : [
+          " * Use %% to get a literal % in the output (escaping)",
+          " * Use %@ to replace with all parameters joined by a space",
+          " * Use %1, %2, etc. to replace with positional parameters",
+          " * Text within template wrappers {%...%} will be removed if no parameters are provided"
+        ],
+        "signature" : "Zing:_processTemplate(text, ...)",
+        "type" : "Method",
+        "returns" : [
+          " * The expanded URL with placeholders replaced",
+          ""
+        ],
+        "name" : "_processTemplate",
+        "def" : "Zing:_processTemplate(text, ...)"
+      },
+      {
+        "doc" : "Callback function called when the query text in the chooser changes\n\nParameters:\n * query - The current text in the chooser input field\n\nNotes:\n * This updates the list of choices shown in the chooser:\n   * The current query is always shown as the first choice\n   * Shortcut suggestions are shown if the query matches any shortcut names",
+        "stripped_doc" : [
+          "Callback function called when the query text in the chooser changes",
+          ""
+        ],
+        "parameters" : [
+          " * query - The current text in the chooser input field",
+          ""
+        ],
+        "desc" : "Callback function called when the query text in the chooser changes",
+        "notes" : [
+          " * This updates the list of choices shown in the chooser:",
+          "   * The current query is always shown as the first choice",
+          "   * Shortcut suggestions are shown if the query matches any shortcut names"
+        ],
+        "signature" : "Zing:_queryChangedCallback(query)",
+        "type" : "Method",
+        "returns" : [
+
+        ],
+        "name" : "_queryChangedCallback",
+        "def" : "Zing:_queryChangedCallback(query)"
+      },
+      {
+        "doc" : "Resolves a shortcut entry into a canonical form\n\nParameters:\n * key - The shortcut key to resolve\n\nReturns:\n * A table with {url, fn, desc} fields, or nil if key doesn't exist",
+        "stripped_doc" : [
+          "Resolves a shortcut entry into a canonical form",
+          ""
+        ],
+        "parameters" : [
+          " * key - The shortcut key to resolve",
+          ""
+        ],
+        "desc" : "Resolves a shortcut entry into a canonical form",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:_resolveShortcut(key)",
+        "type" : "Method",
+        "returns" : [
+          " * A table with {url, fn, desc} fields, or nil if key doesn't exist"
+        ],
+        "name" : "_resolveShortcut",
+        "def" : "Zing:_resolveShortcut(key)"
+      },
+      {
+        "doc" : "Binds hotkeys for Zing\n\nParameters:\n * keymods - A table containing keyboard modifiers\n * keyname - A string containing the name of a keyboard key\n\nReturns:\n * The Zing object",
+        "stripped_doc" : [
+          "Binds hotkeys for Zing",
+          ""
+        ],
+        "parameters" : [
+          " * keymods - A table containing keyboard modifiers",
+          " * keyname - A string containing the name of a keyboard key",
+          ""
+        ],
+        "desc" : "Binds hotkeys for Zing",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:bindHotKey(keymods, keyname)",
+        "type" : "Method",
+        "returns" : [
+          " * The Zing object"
+        ],
+        "name" : "bindHotKey",
+        "def" : "Zing:bindHotKey(keymods, keyname)"
+      },
+      {
+        "doc" : "Initialize the Zing chooser\n\nReturns:\n * The Zing object",
+        "stripped_doc" : [
+          "Initialize the Zing chooser",
+          ""
+        ],
+        "parameters" : [
+
+        ],
+        "desc" : "Initialize the Zing chooser",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:init()",
+        "type" : "Method",
+        "returns" : [
+          " * The Zing object"
+        ],
+        "name" : "init",
+        "def" : "Zing:init()"
+      },
+      {
+        "doc" : "Show the Zing chooser\n\nReturns:\n * The Zing object",
+        "stripped_doc" : [
+          "Show the Zing chooser",
+          ""
+        ],
+        "parameters" : [
+
+        ],
+        "desc" : "Show the Zing chooser",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:show()",
+        "type" : "Method",
+        "returns" : [
+          " * The Zing object"
+        ],
+        "name" : "show",
+        "def" : "Zing:show()"
+      },
+      {
+        "doc" : "Start Zing\n\nReturns:\n * The Zing object",
+        "stripped_doc" : [
+          "Start Zing",
+          ""
+        ],
+        "parameters" : [
+
+        ],
+        "desc" : "Start Zing",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:start()",
+        "type" : "Method",
+        "returns" : [
+          " * The Zing object"
+        ],
+        "name" : "start",
+        "def" : "Zing:start()"
+      },
+      {
+        "doc" : "Stops Zing\n\nReturns:\n * The Zing object",
+        "stripped_doc" : [
+          "Stops Zing",
+          ""
+        ],
+        "parameters" : [
+
+        ],
+        "desc" : "Stops Zing",
+        "notes" : [
+
+        ],
+        "signature" : "Zing:stop()",
+        "type" : "Method",
+        "returns" : [
+          " * The Zing object"
+        ],
+        "name" : "stop",
+        "def" : "Zing:stop()"
+      }
+    ],
+    "name" : "Zing"
+  }
+]
