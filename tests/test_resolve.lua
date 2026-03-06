@@ -20,20 +20,14 @@ local function _resolveShortcut(obj, key)
     end
 
     if type(entry) == "table" then
-        local resolved = {}
-        for k, v in pairs(entry) do
-            resolved[k] = v
+        if entry.url then
+            local desc = entry.desc or entry.url:match("://([^/]+)") or entry.url
+            return { url = entry.url, desc = desc }
         end
-
-        if resolved.url and not resolved.desc then
-            resolved.desc = resolved.url:match("://([^/]+)") or resolved.url
+        if entry.fn then
+            local desc = entry.desc or "Shortcut"
+            return { fn = entry.fn, desc = desc }
         end
-
-        if resolved.fn and not resolved.desc then
-            resolved.desc = "Shortcut"
-        end
-
-        return resolved
     end
 
     return nil

@@ -350,7 +350,10 @@ function obj:_queryChangedCallback(query)
     local queryLower = query:lower()
     for key, _ in pairs(self.shortcuts) do
         if key:lower():find(queryLower, 1, true) then
-            table.insert(choices, self:_createShortcutChoice(key))
+            local choice = self:_createShortcutChoice(key)
+            if choice then
+                table.insert(choices, choice)
+            end
         end
     end
 
