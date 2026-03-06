@@ -19,9 +19,9 @@ docs:
   hs -c "hs.doc.builder.genJSON('{{srcdir}}')" \
     | grep -v "^--" \
     > "{{srcdir}}/docs.json"
-  git diff --quiet "{{srcdir}}/docs.json" \
-    || git add "{{srcdir}}/docs.json" \
-    && git commit -m "Update docs for v{{appver}}"
+  git add "{{srcdir}}/docs.json"
+  git diff --quiet --cached "{{srcdir}}/docs.json" \
+    || git commit -m "Update docs for v{{appver}}"
 
 # create distributable spoon zip
 build:
