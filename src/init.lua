@@ -310,15 +310,16 @@ function obj:_completionCallback(choice)
     end
 
     local text = choice.text
+    local is_shortcut = self:_isShortcut(text)
     local url = self:_handleQueryText(text)
 
-    if not url then
+    if url and type(url) == "string" then
+        self.logger.d("Opening URL:", url)
+        hs.urlevent.openURL(url)
+    elseif not is_shortcut then
         hs.alert.show("Invalid query")
         return false
     end
-
-    self.logger.d("Opening URL:", url)
-    hs.urlevent.openURL(url)
 
     return true
 end
