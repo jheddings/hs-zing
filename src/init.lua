@@ -338,21 +338,32 @@ end
 ---    * Shortcut suggestions are shown if the query matches any shortcut names
 function obj:_queryChangedCallback(query)
     local choices = { }
-    local subText = isURL(query) and "Press Enter to open URL" or "Press Enter to search"
 
-    -- Add the main query option
-    table.insert(choices, {
-        ["text"] = query,
-        ["subText"] = subText
-    })
+    if self:_isShortcut(query) then
+        -- Query starts with a valid shortcut; show single choice with shortcut description
+        local name, _ = self:_parseShortcut(query)
+        local shortcut = self:_resolveShortcut(name)
+        table.insert(choices, {
+            ["text"] = query,
+            ["subText"] = shortcut and shortcut.desc or "Shortcut"
+        })
+    else
+        local subText = isURL(query) and "Press Enter to open URL" or "Press Enter to search"
 
-    -- Add shortcut suggestions that match the query
-    local queryLower = query:lower()
-    for key, _ in pairs(self.shortcuts) do
-        if key:lower():find(queryLower, 1, true) then
-            local choice = self:_createShortcutChoice(key)
-            if choice then
-                table.insert(choices, choice)
+        -- Add the main query option
+        table.insert(choices, {
+            ["text"] = query,
+            ["subText"] = subText
+        })
+
+        -- Add shortcut suggestions that match the query
+        local queryLower = query:lower()
+        for key, _ in pairs(self.shortcuts) do
+            if key:lower():find(queryLower, 1, true) then
+                local choice = self:_createShortcutChoice(key)
+                if choice then
+                    table.insert(choices, choice)
+                end
             end
         end
     end
